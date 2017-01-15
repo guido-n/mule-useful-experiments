@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule version="CE-3.8.0"
+      xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:vm="http://www.mulesoft.org/schema/mule/vm"
+      xmlns:http="http://www.mulesoft.org/schema/mule/http"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="
+            http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+            http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+            http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
+
+    <!--
+        The default exchange-pattern for the HTTP connector is request-response
+        hence the processing strategy for this flow is going to be synchronous
+            https://docs.mulesoft.com/mule-user-guide/v/3.8/flow-processing-strategies#how-mule-selects-a-flow-processing-strategy
+        which means that the receiver thread is gonna carry the message all the way (no SEDA within the flow)
+    -->
+    <flow name="sync-acquisition-flow">
+
+        <http:listener config-ref="http-listener-conf" path="${com.guido.acquisition.synchronous.path}" allowedMethods="POST" />
+
+        <object-to-string-transformer />
+
+        <logger message="ACQUIRED #[message.payload]" level="INFO" />
+
+        <vm:outbound-endpoint ref="persistent.vm.endpoint" doc:name="VM persistent.vm.endpoint" />
+
+        <response>
+            <logger message="RESPONDING #[message.payload]" level="INFO" />
+        </response>
+
+    </flow>
+
+</mule>
+

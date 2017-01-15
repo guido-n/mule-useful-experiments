@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:vm="http://www.mulesoft.org/schema/mule/vm"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:file="http://www.mulesoft.org/schema/mule/file"
+      xsi:schemaLocation="
+            http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+            http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+            http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
+
+    <vm:connector name="consumer.vm.connector">
+        <vm:queue-profile maxOutstandingMessages="${com.guido.consumer.vm.maxoutstandingmessages}"/>
+    </vm:connector>
+
+    <vm:endpoint exchange-pattern="one-way" name="consumer.vm.endpoint" path="consumer.vm" connector-ref="consumer.vm.connector"/>
+
+    <queued-asynchronous-processing-strategy name="consumer-strategy" maxThreads="${com.guido.consumer.vm.threads}"/>
+
+    <!--
+        We can't set a synchronous processing strategy on this flow otherwise it will
+        piggyback the thread that sent a message to the VM ie. the HTTP receiver thread.
+        Hence we are forced to use a queued-asynchronous strategy (because we want SEDA),
+        which means we'll have two thread pools: a receiver thread pool configured on the VM connector, and a flow thread pool configured on the strategy.
+            https://docs.mulesoft.com/mule-user-guide/v/3.8/flow-processing-strategies#queued-asynchronous-flow-processing-strategy
+    -->
+    <flow name="consumer-flow" processingStrategy="consumer-strategy">
+
+        <vm:inbound-endpoint ref="consumer.vm.endpoint"/>
+
+        <!-- PAYLOAD TYPE [java.lang.String] -->
+
+        <expression-filter expression="#[ (xpath3('/childelement/@id')%1000) == 0 ]"/>
+        <logger message="CONSUMED id #[xpath3('/childelement/@id')]" level="INFO"/>
+
+    </flow>
+
+</mule>
+

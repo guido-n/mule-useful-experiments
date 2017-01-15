@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule version="CE-3.8.0"
+      xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:vm="http://www.mulesoft.org/schema/mule/vm"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="
+            http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+            http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
+
+    <!--
+        This flow will have a synchronous processing strategy because it's transactional
+        https://docs.mulesoft.com/mule-user-guide/v/3.8/reliability-patterns
+    -->
+    <flow name="main-consumer-flow">
+
+        <vm:inbound-endpoint ref="persistent.vm.endpoint" doc:name="VM persistent.vm.endpoint">
+            <vm:transaction action="ALWAYS_BEGIN"/>
+        </vm:inbound-endpoint>
+
+        <logger message="CONSUMED #[message.payload]" level="INFO" />
+
+    </flow>
+
+</mule>
+

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule version="CE-3.8.0"
+      xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:http="http://www.mulesoft.org/schema/mule/http"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="
+            http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+            http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+
+    <http:listener-config
+            name="http-listener-conf"
+            host="${com.guido.host}"
+            port="${com.guido.port}"
+            basePath="${com.guido.basepath}" />
+
+    <flow name="get-flow">
+        <http:listener config-ref="http-listener-conf" path="${com.guido.path}" allowedMethods="GET"/>
+
+        <logger message="REQUEST #[message.inboundProperties['http.request.uri']]" level="INFO" />
+        
+        <component>
+            <spring-object bean="exampleComponent" />
+        </component>
+
+        <logger message="EXAMPLE COMPONENT SAID: #[message.payload]" level="INFO" />
+               
+        <set-payload value="${com.guido.payload}"/>
+    </flow>
+
+</mule>
+

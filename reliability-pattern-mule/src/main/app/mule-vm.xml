@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule version="CE-3.8.0"
+      xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:vm="http://www.mulesoft.org/schema/mule/vm"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="
+            http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+            http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
+
+    <vm:connector
+            name="persistent.vm.connector"
+            createMultipleTransactedReceivers="true"
+            numberOfConcurrentTransactedReceivers="4">
+
+        <receiver-threading-profile
+                maxThreadsActive="4"
+                poolExhaustedAction="WAIT"
+                threadWaitTimeout="16000"/>
+
+        <vm:queue-profile maxOutstandingMessages="0">
+            <default-persistent-queue-store/>
+        </vm:queue-profile>
+
+    </vm:connector>
+
+    <vm:endpoint
+            exchange-pattern="one-way"
+            name="persistent.vm.endpoint"
+            path="persistent.vm"
+            connector-ref="persistent.vm.connector"/>
+
+</mule>
+
